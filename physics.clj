@@ -15,3 +15,18 @@
    (- (:y w) (:y v))
    (- (:z w) (:z v))
    ))
+
+(defn vector3-scalar-prod [s w]
+  (->Vector3
+   (* s (:x w))
+   (* s (:y w))
+   (* s (:z w))
+   ))
+
+;; Testing
+(def w (->Vector3 1 2 3))
+(def v (->Vector3 1 1 1))
+(def s 5)
+(vector3-add w v)
+(vector3-sub w v)
+(vector3-scalar-prod s w)
