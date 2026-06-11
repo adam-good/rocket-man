@@ -30,9 +30,11 @@
    ))
 
 ;; Testing
-(def w (->Vector3 1 2 3))
-(def v (->Vector3 1 1 1))
-(def s 5)
-(vector3-add w v)
-(vector3-sub w v)
-(vector3-scalar-prod s w)
+(comment 
+  (def w (->Vector3 1 2 3))
+  (def v (->Vector3 1 1 1))
+  (def s 5)
+  (vector3-add w v)
+  (vector3-sub w v)
+  (vector3-scalar-prod s w) 
+  )
