@@ -2,21 +2,27 @@
 
 (defrecord Vector3 [x y z])
 
-(defn vector3-add [w v]
+(defn vector3-add
+  "Elementwise vector addition"
+  [w v] 
   (->Vector3
    (+ (:x w) (:x v))
    (+ (:y w) (:y v))
    (+ (:z w) (:z v))
    ))
 
-(defn vector3-sub [w v]
+(defn vector3-sub
+  "Elementwise vector subtraction"
+  [w v]
   (->Vector3 
    (- (:x w) (:x v))
    (- (:y w) (:y v))
    (- (:z w) (:z v))
    ))
 
-(defn vector3-scalar-prod [s w]
+(defn vector3-scalar-prod 
+  "Elementwise scalar-vector product"
+  [s w]
   (->Vector3
    (* s (:x w))
    (* s (:y w))
