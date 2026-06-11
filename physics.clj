@@ -26,6 +26,12 @@
    (* s (:y w))
    (* s (:z w))))
 
+(defn enumerate [collection] (map-indexed vector collection))
+
+(defn zip [w v] 
+  (for [[i,a] (enumerate w) [j,b] (enumerate v) :when (= i j)] [a,b]))
+
+
 ;; Testing
 (comment
   (def w (->Vector3 1 2 3))
