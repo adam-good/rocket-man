@@ -22,10 +22,14 @@
 (defn vector-scalar-prod [s u]
   (map #(* % s) u))
 
+(defn dotprod [u v]
+  (reduce + (elementwise-op u v *)))
+
 (comment
   (def u [1 2 3])
   (def v [4 5 6])
   (def s 5)
   (vector-add u v)
   (vector-sub v u)
-  (vector-scalar-prod s u))
+  (vector-scalar-prod s u)
+  (dotprod u v))
