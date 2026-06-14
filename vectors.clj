@@ -1,10 +1,8 @@
 (ns vectors)
 
 ;; Generalized vector ops
-(defn enumerate [collection] (map-indexed vector collection))
-
-(defn zip [u v] 
-  (for [[i,a] (enumerate u) [j,b] (enumerate v) :when (= i j)] [a,b]))
+(defn zip [u v]
+  (map vector u v))
 
 (defn elementwise-op [u v op]
   (map #(op (first %) (second %)) (zip u v)))
