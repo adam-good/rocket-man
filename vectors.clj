@@ -22,7 +22,9 @@
 (defn vector-scalar-prod [s u]
   (map #(* % s) u))
 
-(defn dotprod [u v]
+(defn dotprod
+  "Vector dot product"
+  [u v]
   (reduce + (elementwise-op u v *)))
 
 (comment
