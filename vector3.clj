@@ -1,8 +1,8 @@
 (ns vector3)
 
 (defrecord Vector3 [x y z])
-
-(defn vector3-add
+;
+(defn elem-add
   "Elementwise vector addition"
   [u v]
   (->Vector3
@@ -10,7 +10,7 @@
    (+ (:y u) (:y v))
    (+ (:z u) (:z v))))
 
-(defn vector3-sub
+(defn elem-subtract
   "Elementwise vector subtraction"
   [u v]
   (->Vector3
@@ -18,7 +18,7 @@
    (- (:y u) (:y v))
    (- (:z u) (:z v))))
 
-(defn vector3-scalar-prod
+(defn scalar-product
   "Elementwise scalar-vector product"
   [s u]
   (->Vector3
@@ -26,7 +26,7 @@
    (* s (:y u))
    (* s (:z u))))
 
-(defn vector3-elem-prod
+(defn elem-product
   "Elementwise vector product"
   [u v]
   (->Vector3
@@ -34,8 +34,8 @@
    (* (:y u) (:y v))
    (* (:z u) (:z v))))
 
-(defn vector3-dotprod
-  "Vector dot product"
+(defn dot-product
+  "Vector Cartesian Product"
   [u v]
   (reduce + [(* (:x u) (:x v))
              (* (:y u) (:y v))
@@ -47,8 +47,8 @@
   (def v (->Vector3 3 2 1))
   (def s 5)
   
-  (vector3-add u v)
-  (vector3-sub u v)
-  (vector3-scalar-prod s u)
-  (vector3-elem-prod u v)
-  (vector3-dotprod u v))
+  (elem-add u v)
+  (elem-subtract u v)
+  (scalar-product s u)
+  (elem-product u v)
+  (dot-product u v))
