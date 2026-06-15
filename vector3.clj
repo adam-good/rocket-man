@@ -1,22 +1,23 @@
 (ns vector3)
 
 (defrecord Vector3 [x y z])
-;
+
+(defn elem3-op 
+  [op {ux :x uy :y uz :z} {vx :x vy :y vz :z} ] 
+  (->Vector3
+   (op ux vx)
+   (op uy vy)
+   (op uz vz)))
+
 (defn elem-add
   "Elementwise vector addition"
   [u v]
-  (->Vector3
-   (+ (:x u) (:x v))
-   (+ (:y u) (:y v))
-   (+ (:z u) (:z v))))
+  (elem3-op + u v))
 
 (defn elem-subtract
   "Elementwise vector subtraction"
   [u v]
-  (->Vector3
-   (- (:x u) (:x v))
-   (- (:y u) (:y v))
-   (- (:z u) (:z v))))
+  (elem3-op - u v))
 
 (defn scalar-product
   "Elementwise scalar-vector product"
@@ -29,17 +30,18 @@
 (defn elem-product
   "Elementwise vector product"
   [u v]
-  (->Vector3
-   (* (:x u) (:x v))
-   (* (:y u) (:y v))
-   (* (:z u) (:z v))))
+  (elem3-op * u v))
+
+(defn elem-sum
+  "Add x + y + z"
+  [u]
+  (let [{x :x y :y z :z} u]
+    (+ x y z)))
 
 (defn dot-product
   "Vector Cartesian Product"
   [u v]
-  (reduce + [(* (:x u) (:x v))
-             (* (:y u) (:y v))
-             (* (:z u) (:z v))]))
+  (elem-sum (elem-product u v)))
 
 ;; Testing Vector3
 (comment
