@@ -19,18 +19,16 @@
   [u v]
   (elem3-op - u v))
 
-(defn scalar-product
-  "Elementwise scalar-vector product"
-  [s u]
-  (->Vector3
-   (* s (:x u))
-   (* s (:y u))
-   (* s (:z u))))
-
 (defn elem-product
   "Elementwise vector product"
   [u v]
   (elem3-op * u v))
+
+(defn scalar-product
+  "Elementwise scalar-vector product"
+  [s u]
+  (let [v (->Vector3 s s s)]
+    (elem3-op * u v)))
 
 (defn elem-sum
   "Add x + y + z"
