@@ -41,6 +41,17 @@
   [u v]
   (elem-sum (elem-product u v)))
 
+(defn magnitude [{x :x y :y z :z}]
+  (Math/sqrt (reduce + (map #(Math/pow % 2) [x y z]))))
+
+(defn approx?
+  "Returns non-nil if a,b are within epsilon of each other"
+  ([a b] (approx? a b 5.96e-08))
+  ([a b eps]
+   (-> (/ a b) (Math/abs) (- 1.0) (< eps))))
+
+(defn normal? [u] (approx? (magnitude u) 1.0))
+
 ;; Testing Vector3
 (comment
   (def u (->Vector3 1 2 3))
@@ -51,4 +62,10 @@
   (elem-subtract u v)
   (scalar-product s u)
   (elem-product u v)
-  (dot-product u v))
+  (dot-product u v)
+  
+  (def h (->> (Math/sqrt 2) (/ 1)))
+  (def w (->Vector3 h h 0))
+  (magnitude w)
+  (normal? w)
+  (normal? u))
