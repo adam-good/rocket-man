@@ -16,21 +16,21 @@
 (defrecord PhysicalObj 
            [position velocity acceleration mass])
 
-(defn update-obj [object delta-time]
-  (->PhysicalObj 
-   (update-vector (:position object) (:velocity object) delta-time)
-   (update-vector (:velocity object) (:acceleration object) delta-time)
-   (:acceleration object)
-   (:mass object)))
+(defn update-obj
+  ([object delta-time] (update-obj (v3/zero) object delta-time)) 
+  ([object jerk delta-time]
+   (->PhysicalObj 
+    (update-vector (:position object) (:velocity object) delta-time)
+    (update-vector (:velocity object) (:acceleration object) delta-time)
+    (update-vector (:acceleration object) jerk delta-time)
+    (:mass object))))
 
 (def obj
   (->PhysicalObj
-   (v3/zero)
-   (v3/zero)
-   (v3/->Vector3 0 1 0)
+   (v3/zero)            ;; Position
+   (v3/zero)            ;; Velocity
+   (v3/->Vector3 0 1 0) ;; Acceleration
    1))
-(def dt 0.01)
-(def time-domain (iterate #(+ % dt) 0.0))
-(defn accel [t] (if (< t 0.1) (v3/Vector3 0.5 1.0 0) (v3/zero)))
-
-(take 10 (iterate #(update-obj % dt) obj))
+(def dt 0.05)
+(def time-series (iterate #(+ dt %) 0.0))
+(take 20 (iterate #(update-obj % (v3/->Vector3 0 -1 0) dt) obj))
