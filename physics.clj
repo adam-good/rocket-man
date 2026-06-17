@@ -37,4 +37,4 @@
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series (iterate #(update-obj % (v3/->Vector3 0 -1 0) dt) obj))
 
-(take 20 (utils/zip time-series obj-series))
+(take 20 (for [timestamp time-series data obj-series] [timestamp data]))
