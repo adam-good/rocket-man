@@ -7,12 +7,17 @@
 
 (defn zero [] (->Vector3 0 0 0))
 
-(defn elem3-op 
-  [op {ux :x uy :y uz :z} {vx :x vy :y vz :z} ] 
+(defn elem3-op
+ ([op {x :x y :y z :z}]
   (->Vector3
-   (op ux vx)
-   (op uy vy)
-   (op uz vz)))
+   (op x)
+   (op y)
+   (op z)))
+  ([op {ux :x uy :y uz :z} {vx :x vy :y vz :z} ] 
+   (->Vector3 
+    (op ux vx)
+    (op uy vy)
+    (op uz vz))))
 
 (defn elem-add
   "Elementwise vector addition"
