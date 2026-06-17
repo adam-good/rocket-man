@@ -27,14 +27,23 @@
     (update-vector (:acceleration object) jerk delta-time)
     (:mass object))))
 
-(def obj
-  (->PhysicalObj
-   (v3/zero)            ;; Position
-   (v3/zero)            ;; Velocity
-   (v3/->Vector3 0 1 0) ;; Acceleration
+(def target (v3/->Vector3 0 10 0))
+(defn jerk [pos targ] 
+  (->> (v3/elem-subtract targ pos) (v3/elem3-op #(min 1 %)) ))
+(def obj 
+  (->PhysicalObj 
+   (v3/zero) ; Position 
+   (v3/zero) ; Velocity 
+   (v3/->Vector3 5 0 2.5) ; Acceleration 
    1))
 (def dt 0.05)
 (def time-series (iterate #(+ dt %) 0.0))
-(def obj-series (iterate #(update-obj % (v3/->Vector3 0 -1 0) dt) obj))
+(def obj-series (iterate #(update-obj % (-> (:position %) (jerk target)) dt) obj))
 
-(take 20 (utils/zip time-series obj-series))
+(def raw-data
+  (utils/zip time-series (for [obj obj-series] obj)))
+
+(def csv-data 
+  (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
+
+(take 10 csv-data)
