@@ -38,12 +38,19 @@
    1))
 (def dt 0.05)
 (def time-series (iterate #(+ dt %) 0.0))
-(def obj-series (iterate #(update-obj % (-> (:position %) (jerk target)) dt) obj))
-
+(def obj-series 
+  (iterate #(update-obj % (-> (:position %) (jerk target)) dt) obj))
 (def raw-data
   (utils/zip time-series (for [obj obj-series] obj)))
 
-(def csv-data 
-  (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
-
-(take 10 csv-data)
+;; (require '[clojure.data.csv :as csv] '[clojure.java.io :as io])
+;; (def csv-data 
+;;   (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
+;; 
+;; (defn write-csv [path data]
+;;   (let [columns [:time :x :y :z]
+;;         headers (map name columns)
+;;         rows (mapv #(mapv % columns) data)]
+;;     (with-open [file (io/write)])))
+;; 
+;; (take 10 csv-data)
