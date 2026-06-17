@@ -1,4 +1,7 @@
-(ns vector3)
+(load-file "utils.clj")
+
+(ns vector3
+  (:require [utils]))
 
 (defrecord Vector3 [x y z])
 
@@ -46,13 +49,8 @@
 (defn magnitude [{x :x y :y z :z}]
   (Math/sqrt (reduce + (map #(Math/pow % 2) [x y z]))))
 
-(defn approx?
-  "Returns non-nil if a,b are within epsilon of each other"
-  ([a b] (approx? a b 5.96e-08))
-  ([a b eps]
-   (-> (/ a b) (Math/abs) (- 1.0) (< eps))))
 
-(defn normal? [u] (approx? (magnitude u) 1.0))
+(defn normal? [u] (utils/approx? (magnitude u) 1.0))
 
 ;; Testing Vector3
 (comment

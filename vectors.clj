@@ -1,11 +1,11 @@
-(ns vectors)
+(load-file "utils.clj")
+
+(ns vectors
+  (:require [utils]))
 
 ;; Generalized vector ops
-(defn zip [u v]
-  (map vector u v))
-
 (defn elementwise-op [u v op]
-  (map #(op (first %) (second %)) (zip u v)))
+  (map #(op (first %) (second %)) (utils/zip u v)))
 
 (defn elem-add 
   "Elementwise vector addition"
