@@ -51,6 +51,13 @@
   [u v]
   (elem-sum (elem-product u v)))
 
+(defn project
+  "Vector Projection"
+  [u v]
+  (let [numerator (dot-product u v)
+        denominator (dot-product u u)]
+    (scalar-product (/ numerator denominator) u)))
+
 (defn magnitude [{x :x y :y z :z}]
   (Math/sqrt (reduce + (map #(Math/pow % 2) [x y z]))))
 
