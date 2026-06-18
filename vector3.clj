@@ -54,6 +54,8 @@
 (defn magnitude [{x :x y :y z :z}]
   (Math/sqrt (reduce + (map #(Math/pow % 2) [x y z]))))
 
+(defn normalize [u]
+  (elem3-op #(/ % (magnitude u)) u))
 
 (defn normal? [u] (utils/approx? (magnitude u) 1.0))
 
@@ -74,6 +76,7 @@
   (def h (->> (Math/sqrt 2) (/ 1)))
   (def w (->Vector3 h h 0))
   (magnitude w)
+  (magnitude (normalize u))
   (normal? w)
   (normal? u)
   )
