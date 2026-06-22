@@ -12,8 +12,8 @@
 (defn apply-differential [vector differential]
   (v3/elem-add vector differential))
 
-(defn update-vector [vector differential delta-time]
-  (apply-differential vector (get-differential differential delta-time)))
+(defn update-vector [vector derivative delta-time]
+  (apply-differential vector (get-differential derivative delta-time)))
 
 (defrecord PhysicalObj
            [position velocity acceleration mass])
