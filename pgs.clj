@@ -11,37 +11,31 @@
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
 (defn impact? [projectile target] (->> (:position projectile) (distance target) (< 1e-3)))
-(defn digitalize [x] 
-  (cond
-    (< x -0.99) -1
-    (> x  0.99)  1
-    :else       0))
-(defn digitalize-vector [{x :x y :y z :z}]
-  (v3/->Vector3
-   (digitalize x)
-   (digitalize y)
-   (digitalize z)))
 
 ;; Projectile Guidance System
 (defn calculate-jerk 
   "Projectile Guidance System (PGS)\n
    Calculates the needed Jerk to guide the projectile to the target"
-  [{position :p velocity :v} target] 
-  (let [direction  (->> (v3/elem-subtract target velocity) (v3/normalize))
-        correction (v3/elem-subtract direction velocity)
-        magnitude (->> (v3/elem-subtract position target)
-                       (#(v3/elem3-op / %2 %1) velocity))]
-    (->> correction (v3/normalize)
-         #_(v3/elem-product magnitude)
-         #_(digitalize-vector)
-         (v3/scalar-product 2) )))
+  [position velocity acceleration target delta-t] 
+  (let [pos-diff (->> (v3/elem-subtract position target) 
+                      (v3/normalize) 
+                      (v3/scalar-product (* 0.1 (distance position target)) ))
+        vel-next (phi/update-vector velocity acceleration delta-t)
+        acc-next acceleration] ;; TODO: Find a better way to handle this err
+    (->> (v3/elem-subtract
+          (-> (/ 1 (* delta-t delta-t delta-t)) (v3/scalar-product pos-diff)) 
+          (-> (/ 1 (* delta-t delta-t))         (v3/scalar-product vel-next))  
+          (-> (/ 1 delta-t)                     (v3/scalar-product acc-next)))
+         (v3/normalize)
+         (v3/elem3-op #(min % 1))
+         )))
 
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)             ; Position 
-   (v3/->Vector3 1e-1 1e-1 1)             ; Velocity 
+   (v3/->Vector3 0 0 1)  ; Velocity 
    (v3/zero)             ; Acceleration 
    1))
 (def dt 0.05)
@@ -49,7 +43,11 @@
 ;; Series Defnitions
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series
-  (iterate #(phi/update-obj % (-> {:p (:position %) :v (:velocity %)} (calculate-jerk target)) dt) projectile))
+  (iterate 
+   #(phi/update-obj % 
+                    (calculate-jerk (:position %) (:velocity %) (:acceleration %) target dt) 
+                    dt) 
+   projectile ))
 
 ;; Limit Results
 (def result (take-while #(impact? % target) obj-series))
@@ -69,4 +67,5 @@
   (with-open [file (io/writer path)]
     (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
 
-(write-csv 100 "./output/test.csv")
+(write-csv 50 "./output/test.csv")
+
