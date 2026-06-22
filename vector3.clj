@@ -21,13 +21,13 @@
 
 (defn elem-add
   "Elementwise vector addition"
-  [u v]
-  (elem3-op + u v))
+  [u v & more]
+  (reduce #(elem3-op + %1 %2) (zero) (into more [u v]) ))
 
 (defn elem-subtract
   "Elementwise vector subtraction"
-  [u v]
-  (elem3-op - u v))
+  [u v & more]
+  (reduce #(elem3-op - %1 %2) (zero) (into more [u v])))
 
 (defn elem-product
   "Elementwise vector product"
