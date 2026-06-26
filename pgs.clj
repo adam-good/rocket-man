@@ -12,22 +12,23 @@
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
 (defn impact? [projectile target] (->> (:position projectile) (distance target) (< 1e-5)))
 
-(defn calculate-jerk 
+(defn calculate-pos-error [position target] (v3/elem-subtract target position))
+(defn calculate-target-accel [pos-err dampening] 
+  (v3/scalar-product dampening pos-err))
+(defn calculate-jerk [target-accel accel dampening] 
+  (v3/scalar-product dampening (v3/elem-subtract target-accel accel)))
+
+(defn guidance-system
   "Projectile Guidance System (PGS)\n
-   Calculates the needed Jerk to guide the projectile to the target"
-  [pos vel acc targ delta-t]
-  (let [pos-diff (v3/elem-subtract pos targ)
-        dt  (/ 1 delta-t)
-        dt2 (/ 1 (* delta-t delta-t))
-        dt3 (/ 1 (* delta-t delta-t delta-t))]
-    (v3/elem-add
-     (v3/scalar-product (* -2 dt3) pos-diff)
-     (v3/scalar-product dt3 vel)
-     (v3/scalar-product dt2 vel)
-     (v3/scalar-product dt acc))))
+     Calculates the needed Jerk to guide the projectile to the target"
+  [pos acc targ alpha beta]
+  (-> 
+   (calculate-pos-error pos targ) 
+   (calculate-target-accel alpha) 
+   (calculate-jerk acc beta) ))
 
 ;; Initial Conditions
-(def target (v3/->Vector3 1 1 1))
+(def target (v3/->Vector3 2 2 2))
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)             ; Position 
@@ -40,17 +41,16 @@
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series
   (iterate 
-   #(phi/update-obj 
-     % (calculate-jerk (:position %) (:velocity %) (:acceleration %) target dt)
-     dt) 
+   #(phi/update-obj % 
+      (guidance-system 
+       (:position %) (:acceleration %) target
+       0.1 0.5) dt) 
    projectile ))
 
 ;; Limit Results
 (def result (take-while #(impact? % target) obj-series))
 (def raw-data
   (utl/zip time-series (for [obj result] obj)))
-
-(take 10 result)
 
 ;; Write to CSV
 (require '[clojure.java.io :as io] '[clojure.string :refer [join]])
@@ -65,5 +65,5 @@
   (with-open [file (io/writer path)]
     (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
 
-(write-csv 50 "./output/test.csv")
+(write-csv 100 "./output/test.csv")
 
