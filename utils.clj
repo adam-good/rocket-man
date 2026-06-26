@@ -11,5 +11,6 @@
   ([a b eps]
    (cond
      (and (== a 0) (== b 0)) true
-     (== b 0) false
+     (and (== a 0) (not= b 0)) false
+     (and (not= a 0) (== b 0)) false 
      :else (-> (/ a b) (Math/abs) (- 1.0) (< eps)))))
