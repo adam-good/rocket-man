@@ -29,10 +29,8 @@
 (defn calculate-jerk 
   "Projectile Guidance System (PGS)\n
    Calculates the needed Jerk to guide the projectile to the target"
-  [direction magnitude]
-  (do
-    (println direction)
-    (v3/scalar-product magnitude direction)))
+  [direction magnitude] 
+  (v3/scalar-product magnitude direction))
 
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
