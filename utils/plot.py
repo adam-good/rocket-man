@@ -43,9 +43,9 @@ def update(frame):
     # Update data up to the current frame
     scatter._offsets3d = (x[:frame+1], y[:frame+1], z[:frame+1])
     target._offsets3d = (target_x, target_y, target_z)
-    ax.set_xlim(0, max(x+target_x))
-    ax.set_ylim(0, max(y+target_y))
-    ax.set_zlim(0, max(z+target_z))
+    ax.set_xlim(0, max(target_x))
+    ax.set_ylim(0, max(target_y))
+    ax.set_zlim(0, max(target_z))
     return scatter, target
 
 # Create animation

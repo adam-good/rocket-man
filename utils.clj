@@ -9,4 +9,7 @@
   "Returns non-nil if a,b are within epsilon of each other"
   ([a b] (approx? a b 5.96e-08))
   ([a b eps]
-   (-> (/ a b) (Math/abs) (- 1.0) (< eps))))
+   (cond
+     (and (== a 0) (== b 0)) true
+     (== b 0) false
+     :else (-> (/ a b) (Math/abs) (- 1.0) (< eps)))))

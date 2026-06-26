@@ -61,8 +61,11 @@
 (defn magnitude [{x :x y :y z :z}]
   (Math/sqrt (reduce + (map #(Math/pow % 2) [x y z]))))
 
-(defn normalize [u]
-  (elem3-op #(/ % (magnitude u)) u))
+(defn normalize [u] 
+  (let [m (magnitude u)] 
+    (if (utils/approx? 0 m) 
+      (zero) 
+      (elem3-op #(/ % m) u))))
 
 (defn normal? [u] (utils/approx? (magnitude u) 1.0))
 
