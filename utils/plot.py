@@ -12,9 +12,9 @@ x = df['x']
 y = df['y']
 z = df['z']
 
-target_x = [2]
-target_y = [2]
-target_z = [2]
+target_x = [1]
+target_y = [1]
+target_z = [1]
 
 # Create a 3D plot
 fig = plt.figure(figsize=(10, 8))

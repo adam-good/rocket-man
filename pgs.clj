@@ -10,30 +10,35 @@
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
-(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 1e-5)))
+(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 1e-3)))
 
-(defn calculate-pos-error [position target] (v3/elem-subtract target position))
-(defn calculate-target-accel [pos-err dampening] 
-  (v3/scalar-product dampening pos-err))
-(defn calculate-jerk [target-accel accel dampening] 
-  (v3/scalar-product dampening (v3/elem-subtract target-accel accel)))
+(defn target-acceleration [pos vel acc targ-pos k_p k_d]
+  (let [dir      (v3/elem-subtract targ-pos pos)
+        dist     (distance pos targ-pos)
+        targ-vel (v3/scalar-product dist dir)
+        err-vel  (v3/elem-subtract targ-vel vel)]
+    
+    (v3/elem-add
+     acc
+     (v3/scalar-product k_p err-vel)
+     (v3/scalar-product (* -1 k_d) vel))))
+
+(defn jerk [target-accel accel] 
+  (v3/elem-subtract target-accel accel))
 
 (defn guidance-system
   "Projectile Guidance System (PGS)\n
      Calculates the needed Jerk to guide the projectile to the target"
-  [pos acc targ alpha beta]
-  (-> 
-   (calculate-pos-error pos targ) 
-   (calculate-target-accel alpha) 
-   (calculate-jerk acc beta) ))
+  [pos vel acc targ k_p k_d]
+  (jerk (target-acceleration pos vel acc targ k_p k_d) acc))
 
 ;; Initial Conditions
-(def target (v3/->Vector3 2 2 2))
+(def target (v3/->Vector3 1 1 1))
 (def projectile
   (phi/->PhysicalObj
-   (v3/zero)             ; Position 
-   (v3/->Vector3 0 0 1)  ; Velocity 
-   (v3/zero)             ; Acceleration 
+   (v3/zero)               ; Position 
+   (v3/->Vector3 0 0 0)  ; Velocity 
+   (v3/zero)               ; Acceleration 
    1))
 (def dt 0.05)
 
@@ -43,8 +48,8 @@
   (iterate 
    #(phi/update-obj % 
       (guidance-system 
-       (:position %) (:acceleration %) target
-       0.1 0.5) dt) 
+       (:position %) (:velocity %) (:acceleration %) target
+       1.0 0.5) dt) 
    projectile ))
 
 ;; Limit Results
@@ -65,5 +70,5 @@
   (with-open [file (io/writer path)]
     (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
 
-(write-csv 100 "./output/test.csv")
+(write-csv 300 "./output/test.csv")
 
