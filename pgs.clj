@@ -10,12 +10,13 @@
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
-(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 1e-3)))
+(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 7e-2)))
 
 (defn target-acceleration [pos vel acc targ-pos k_p k_d]
   (let [dir      (v3/elem-subtract targ-pos pos)
         dist     (distance pos targ-pos)
-        targ-vel (v3/scalar-product dist dir)
+        targ-speed (-> (distance vel targ-pos) (/ dist dist dist))
+        targ-vel (v3/scalar-product  targ-speed dir)
         err-vel  (v3/elem-subtract targ-vel vel)]
     
     (v3/elem-add
@@ -37,7 +38,7 @@
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)               ; Position 
-   (v3/->Vector3 0 0 0)  ; Velocity 
+   (v3/->Vector3 0 0 0.5)  ; Velocity 
    (v3/zero)               ; Acceleration 
    1))
 (def dt 0.05)
@@ -49,7 +50,7 @@
    #(phi/update-obj % 
       (guidance-system 
        (:position %) (:velocity %) (:acceleration %) target
-       1.0 0.5) dt) 
+       0.5 0.99) dt) 
    projectile ))
 
 ;; Limit Results
