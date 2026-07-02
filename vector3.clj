@@ -27,7 +27,7 @@
 (defn elem-subtract
   "Elementwise vector subtraction"
   [u v & more]
-  (reduce #(elem3-op - %1 %2) (zero) (into more [u v])))
+  (reduce #(elem3-op - %1 %2) u (into more [v])))
 
 (defn elem-product
   "Elementwise vector product"
