@@ -38,7 +38,7 @@
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)               ; Position 
-   (v3/->Vector3 0 0 0.5)  ; Velocity 
+   (v3/->Vector3 0 0 0.2)  ; Velocity 
    (v3/zero)               ; Acceleration 
    1))
 (def dt 0.05)
