@@ -19,17 +19,17 @@
    ":"  
    (-> value quoteize) ))
 
-(defmulti to-json class)
-(defmethod to-json :default      [data] (str data))
-(defmethod to-json ::array       [data] 
+(defmulti to-json-string class)
+(defmethod to-json-string :default      [data] (str data))
+(defmethod to-json-string ::array       [data] 
   (->>
-   (map to-json data)
+   (map to-json-string data)
    (join ",")
    (bracketize-square)))
-(defmethod to-json ::collection  [data]
+(defmethod to-json-string ::collection  [data]
   (->>
    (for [[key value] data]
-     (create-json-pair key (to-json value)))
+     (create-json-pair key (to-json-string value)))
    (join ",")
    (bracketize-curly)))
 
@@ -39,5 +39,5 @@
    {:a "A" :b "B" :c {:d "D"}}
    {:e "E" :f {:g "G"} :h "H"}
 ] )
-(def json-str (to-json data))
+(def json-str (to-json-string data))
 (println json-str)
