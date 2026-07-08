@@ -6,14 +6,18 @@
 (derive java.util.Map ::collection)
 (derive java.util.ArrayList ::array)
 
-(defn key-to-string [key]
-  (str (name key) ":"))
-
-(defn create-json-pair [key value]
-  (str (key-to-string key) value))
-
 (defn bracketize-curly [s] (str "{" s "}"))
 (defn bracketize-square [s] (str "[" s "]"))
+(defn quoteize [s] (str "\"" s "\"") )
+
+(defn key-to-string [key]
+  (str (name key)))
+
+(defn create-json-pair [key value]
+  (str 
+   (-> (key-to-string key) (quoteize))  
+   ":"  
+   (-> value quoteize) ))
 
 (defmulti to-json class)
 (defmethod to-json :default      [data] (str data))
@@ -35,5 +39,5 @@
    {:a "A" :b "B" :c {:d "D"}}
    {:e "E" :f {:g "G"} :h "H"}
 ] )
-(to-json data)
-
+(def json-str (to-json data))
+(println json-str)
