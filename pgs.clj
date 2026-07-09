@@ -57,36 +57,15 @@
 
 ;; Limit Results
 (def result (take-while #(impact? % target) obj-series))
-;; (def raw-data
-;;   (utl/zip time-series (for [obj result] obj)))
 (def raw-data
   (for [[timestep, data] (utl/zip time-series result)]
     {:timestep timestep :datapoint data}))
+(def dataset (take 300 raw-data))
 
 (require '[clojure.java.io :as io])
-(def json-data (json/write-str raw-data))
+(def json-data (json/write-str dataset))
 (with-open [file (io/writer "./output/test.json")]
   (.write file json-data))
 
-(comment
-  ;; Write to CSV
-  (require '[clojure.java.io :as io] '[clojure.string :refer [join]])
 
-  (def csv-data
-    (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
-
-
-  (def csv-header (->> [:time :x :y :z] (map name) (join ",")))
-
-  (defn csv-row [{t :time {x :x y :y z :z} :position}] (join "," [t x y z]))
-
-  (def csv-row-data (map csv-row csv-data))
-
-
-  (defn write-csv [nrows path]
-    (with-open [file (io/writer path)]
-      (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
-
-
-  (write-csv 300 "./output/test.csv"))
 
