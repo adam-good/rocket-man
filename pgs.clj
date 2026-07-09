@@ -1,12 +1,14 @@
 (load-file "vector3.clj")
 (load-file "physics.clj")
 (load-file "utils.clj")
+(load-file "json.clj")
 
 (ns pgs
   (:require
    [vector3 :as v3]
    [physics :as phi]
-   [utils   :as utl]))
+   [utils   :as utl]
+   [json    :as json]))
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
@@ -18,13 +20,13 @@
         targ-speed (-> (distance vel targ-pos) (/ dist dist dist))
         targ-vel (v3/scalar-product  targ-speed dir)
         err-vel  (v3/elem-subtract targ-vel vel)]
-    
+
     (v3/elem-add
      acc
      (v3/scalar-product k_p err-vel)
      (v3/scalar-product (* -1 k_d) vel))))
 
-(defn jerk [target-accel accel] 
+(defn jerk [target-accel accel]
   (v3/elem-subtract target-accel accel))
 
 (defn guidance-system
@@ -46,30 +48,45 @@
 ;; Series Defnitions
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series
-  (iterate 
-   #(phi/update-obj % 
-      (guidance-system 
-       (:position %) (:velocity %) (:acceleration %) target
-       0.5 0.99) dt) 
-   projectile ))
+  (iterate
+   #(phi/update-obj %
+                    (guidance-system
+                     (:position %) (:velocity %) (:acceleration %) target
+                     0.5 0.99) dt)
+   projectile))
 
 ;; Limit Results
 (def result (take-while #(impact? % target) obj-series))
+;; (def raw-data
+;;   (utl/zip time-series (for [obj result] obj)))
 (def raw-data
-  (utl/zip time-series (for [obj result] obj)))
+  (for [[timestep, data] (utl/zip time-series result)]
+    {:timestep timestep :datapoint data}))
 
-;; Write to CSV
-(require '[clojure.java.io :as io] '[clojure.string :refer [join]])
-(def csv-data
-  (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
+(require '[clojure.java.io :as io])
+(def json-data (json/write-str raw-data))
+(with-open [file (io/writer "./output/test.json")]
+  (.write file json-data))
 
-(def csv-header (->> [:time :x :y :z] (map name) (join ",")))
-(defn csv-row [{t :time {x :x y :y z :z} :position}] (join "," [t x y z]))
-(def csv-row-data (map csv-row csv-data))
+(comment
+  ;; Write to CSV
+  (require '[clojure.java.io :as io] '[clojure.string :refer [join]])
 
-(defn write-csv [nrows path]
-  (with-open [file (io/writer path)]
-    (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
+  (def csv-data
+    (for [datapoint raw-data] (merge {:time (first datapoint)} (second datapoint))))
 
-(write-csv 300 "./output/test.csv")
+
+  (def csv-header (->> [:time :x :y :z] (map name) (join ",")))
+
+  (defn csv-row [{t :time {x :x y :y z :z} :position}] (join "," [t x y z]))
+
+  (def csv-row-data (map csv-row csv-data))
+
+
+  (defn write-csv [nrows path]
+    (with-open [file (io/writer path)]
+      (.write file (->> csv-row-data (take nrows) (cons csv-header) (join "\n")))))
+
+
+  (write-csv 300 "./output/test.csv"))
 
