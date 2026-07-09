@@ -39,8 +39,10 @@
    (join ",")
    (bracketize-curly)))
 
+(defmulti  write-str json-type)
+(defmethod write-str :object [data] (serialize data))
+(defmethod write-str :default [data] (serialize {:data data}))
 
-(def data 
-  {:data [{:a "A" :b "B" :c {:d 123}} {:e "E" :f {:g "G"} :h true}]})
-(def json-str (serialize data))
+(def data [{:a "A" :b "B" :c {:d 123}} {:e "E" :f {:g "G"} :h true}])
+(def json-str (write-str data))
 (println json-str)
