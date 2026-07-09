@@ -24,10 +24,10 @@
 
 (defmulti to-json-string json-type)
 (defmethod to-json-string :default [data] (str data))
-(defmethod to-json-string :bool   [data] (str data)) ; TODO: Let default do this?
-(defmethod to-json-string :string [data] (quoteize data))
-(defmethod to-json-string :number [data] (str data))
-(defmethod to-json-string :array       [data]
+(defmethod to-json-string :bool    [data] (str data)) ; TODO: Let default do this?
+(defmethod to-json-string :string  [data] (quoteize data))
+(defmethod to-json-string :number  [data] (str data))
+(defmethod to-json-string :array   [data]
   (->>
    (map to-json-string data)
    (join ",")
