@@ -20,27 +20,27 @@
 (defn create-json-pair [key value]
   (str
    (-> (key-to-string key) (quoteize))
-   " : " value))
+   ":" value))
 
-(defmulti to-json-string json-type)
-(defmethod to-json-string :default [data] (str data))
-(defmethod to-json-string :bool    [data] (str data)) ; TODO: Let default do this?
-(defmethod to-json-string :string  [data] (quoteize data))
-(defmethod to-json-string :number  [data] (str data))
-(defmethod to-json-string :array   [data]
+(defmulti serialize json-type)
+(defmethod serialize :default [data] (str data))
+(defmethod serialize :bool    [data] (str data)) ; TODO: Let default do this?
+(defmethod serialize :string  [data] (quoteize data))
+(defmethod serialize :number  [data] (str data))
+(defmethod serialize :array   [data]
   (->>
-   (map to-json-string data)
+   (map serialize data)
    (join ",")
    (bracketize-square)))
-(defmethod to-json-string :object  [data]
+(defmethod serialize :object  [data]
   (->>
    (for [[key value] data]
-     (create-json-pair key (to-json-string value)))
+     (create-json-pair key (serialize value)))
    (join ",")
    (bracketize-curly)))
 
 
 (def data 
   {:data [{:a "A" :b "B" :c {:d 123}} {:e "E" :f {:g "G"} :h true}]})
-(def json-str (to-json-string data))
+(def json-str (serialize data))
 (println json-str)
