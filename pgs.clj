@@ -5,6 +5,7 @@
 
 (ns pgs
   (:require
+   [clojure.math :as math]
    [vector3 :as v3]
    [physics :as phi]
    [utils   :as utl]
@@ -12,38 +13,69 @@
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
-(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 7e-2)))
+(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 0.1)))
 
-(defn target-acceleration [pos vel acc targ-pos k_p k_d]
-  (let [dir      (v3/elem-subtract targ-pos pos)
-        dist     (distance pos targ-pos)
-        targ-speed (-> (distance vel targ-pos) (/ dist dist dist))
-        targ-vel (v3/scalar-product  targ-speed dir)
-        err-vel  (v3/elem-subtract targ-vel vel)]
 
+(defn c3 [N r0 rt v0 vt a0 at]
+  (let [pos-coef (/ 1 (* N N N))
+        vel-coef (/ 1 (* N N))
+        acc-coef (/ 1 (* 2 N))
+        position (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
+        velocity (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product  -6 v0))
+        accel    (v3/elem-add  at                       (v3/scalar-product  -3 a0))]
     (v3/elem-add
-     acc
-     (v3/scalar-product k_p err-vel)
-     (v3/scalar-product (* -1 k_d) vel))))
+     (v3/scalar-product pos-coef position)
+     (v3/scalar-product vel-coef velocity) 
+     (v3/scalar-product acc-coef accel))))
 
-(defn jerk [target-accel accel]
-  (v3/elem-subtract target-accel accel))
+(defn c4 [N r0 rt v0 vt a0 at]
+  (let [pos-coef (/ 15 (* N N N N))
+        vel-coef (/ 1 (* N N N))
+        acc-coef (/ 1 (* 2 N N))
+        position (v3/elem-subtract r0 rt)
+        velocity (v3/elem-add (v3/scalar-product 8 v0) (v3/scalar-product  7 vt))
+        accel    (v3/elem-add (v3/scalar-product 3 a0) (v3/scalar-product -2 at))]
+    (v3/elem-add
+     (v3/scalar-product pos-coef position)
+     (v3/scalar-product vel-coef velocity)
+     (v3/scalar-product acc-coef accel))))
+
+(defn c5 [N r0 rt v0 vt a0 at]
+  (let [pos-coef (/  6 (* N N N N N))
+        vel-coef (/ -3 (* N N N N))
+        acc-coef (/  1 (* N N))
+        position (v3/elem-subtract rt r0)
+        velocity (v3/elem-add v0 vt)
+        accel    (v3/elem-subtract at a0)]
+    (v3/elem-add
+     (v3/scalar-product pos-coef position)
+     (v3/scalar-product vel-coef velocity)
+     (v3/scalar-product acc-coef accel))))
+
+(defn jerk-profile [N r0 rt v0 vt a0 at]
+  (v3/elem-add
+   (v3/scalar-product 6 (c3 N r0 rt v0 vt a0 at))
+   (v3/scalar-product (* 24 N) (c4 N r0 rt v0 vt a0 at))
+   (v3/scalar-product (* 60 N N) (c5 N r0 rt v0 vt a0 at))))
 
 (defn guidance-system
   "Projectile Guidance System (PGS)\n
      Calculates the needed Jerk to guide the projectile to the target"
-  [pos vel acc targ k_p k_d]
-  (jerk (target-acceleration pos vel acc targ k_p k_d) acc))
+  [N pos vel acc targ]
+  (let [targ-vel (v3/elem-subtract targ vel)
+        targ-acc (v3/elem-subtract targ-vel vel)] 
+    (jerk-profile N pos targ vel targ-vel acc targ-acc )))
+
 
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)               ; Position 
-   (v3/->Vector3 0 0 0.2)  ; Velocity 
+   (v3/->Vector3 0 0 1)  ; Velocity 
    (v3/zero)               ; Acceleration 
    1))
-(def dt 0.05)
+(def dt 0.01)
 
 ;; Series Defnitions
 (def time-series (iterate #(+ dt %) 0.0))
@@ -51,8 +83,9 @@
   (iterate
    #(phi/update-obj %
                     (guidance-system
-                     (:position %) (:velocity %) (:acceleration %) target
-                     0.5 0.99) dt)
+                     (-> (* 60 (max (:x target) (:y target) (:z target))) 
+                         (/ 1.5e1) (math/cbrt) ) 
+                     (:position %) (:velocity %) (:acceleration %) target) dt)
    projectile))
 
 ;; Limit Results
