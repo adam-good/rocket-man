@@ -13,7 +13,7 @@
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
-(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 0.1)))
+(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 0.05)))
 
 
 (defn c3 [N r0 rt v0 vt a0 at]
@@ -62,17 +62,19 @@
   "Projectile Guidance System (PGS)\n
      Calculates the needed Jerk to guide the projectile to the target"
   [N pos vel acc targ]
-  (let [targ-vel (v3/elem-subtract targ vel)
-        targ-acc (v3/elem-subtract targ-vel vel)] 
+  (let [targ-vel (v3/zero) ;(v3/elem-subtract targ vel)
+        targ-acc (v3/zero) ;(v3/elem-subtract targ-vel vel)
+        ] 
     (jerk-profile N pos targ vel targ-vel acc targ-acc )))
 
+(defn rand-neg1 [n] (-> (rand n) (- (/ n 2)) (* 2)))
 
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
 (def projectile
   (phi/->PhysicalObj
    (v3/zero)               ; Position 
-   (v3/->Vector3 0 0 1)  ; Velocity 
+   (->> (v3/->Vector3 (rand-neg1 1) (rand-neg1 1) (rand-neg1 1) ) (v3/normalize))  ; Velocity 
    (v3/zero)               ; Acceleration 
    1))
 (def dt 0.01)
@@ -84,7 +86,7 @@
    #(phi/update-obj %
                     (guidance-system
                      (-> (* 60 (max (:x target) (:y target) (:z target))) 
-                         (/ 1.5e1) (math/cbrt) ) 
+                         (/ 2e2) (math/cbrt) ) 
                      (:position %) (:velocity %) (:acceleration %) target) dt)
    projectile))
 
