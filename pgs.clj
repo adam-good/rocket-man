@@ -13,20 +13,30 @@
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
-(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 0.05)))
+(defn impact? [projectile target] (->> (:position projectile) (distance target) (< 0.1)))
 
 
-(defn c3 [N r0 rt v0 vt a0 at]
-  (let [pos-coef (/ 1 (* N N N))
-        vel-coef (/ 1 (* N N))
-        acc-coef (/ 1 (* 2 N))
-        position (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
-        velocity (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product  -6 v0))
-        accel    (v3/elem-add  at                       (v3/scalar-product  -3 a0))]
-    (v3/elem-add
-     (v3/scalar-product pos-coef position)
-     (v3/scalar-product vel-coef velocity) 
-     (v3/scalar-product acc-coef accel))))
+(defn c3 
+  ([N r0 v0 a0 rt]
+    (let [pos-coef (/ 1 (* N N N))
+          vel-coef (/ 1 (* N N))
+          acc-coef (/ 1 N)
+          position (v3/elem-subtract rt r0)]
+      (v3/elem-add
+       (v3/scalar-product pos-coef position) 
+       (v3/scalar-product (* -1 vel-coef) v0)
+       (v3/scalar-product (* -1 acc-coef) a0))))
+  ([N r0 v0 a0 rt vt at]
+   (let [pos-coef (/ 1 (* N N N))
+         vel-coef (/ 1 (* N N))
+         acc-coef (/ 1 (* 2 N))
+         position (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
+         velocity (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product  -6 v0))
+         accel    (v3/elem-add  at                       (v3/scalar-product  -3 a0))]
+     (v3/elem-add
+      (v3/scalar-product pos-coef position)
+      (v3/scalar-product vel-coef velocity) 
+      (v3/scalar-product acc-coef accel)))))
 
 (defn c4 [N r0 rt v0 vt a0 at]
   (let [pos-coef (/ 15 (* N N N N))
@@ -52,20 +62,20 @@
      (v3/scalar-product vel-coef velocity)
      (v3/scalar-product acc-coef accel))))
 
-(defn jerk-profile [N r0 rt v0 vt a0 at]
-  (v3/elem-add
-   (v3/scalar-product 6 (c3 N r0 rt v0 vt a0 at))
-   (v3/scalar-product (* 24 N) (c4 N r0 rt v0 vt a0 at))
-   (v3/scalar-product (* 60 N N) (c5 N r0 rt v0 vt a0 at))))
+(defn jerk-profile
+  ([N r0 v0 a0 rt]
+   (v3/scalar-product 6 (c3 N r0 v0 a0 rt)))
+  ([N r0 v0 a0 rt vt at]
+   (v3/elem-add
+    (v3/scalar-product 6 (c3 N r0 rt v0 vt a0 at))
+    (v3/scalar-product (* 24 N) (c4 N r0 rt v0 vt a0 at))
+    (v3/scalar-product (* 60 N N) (c5 N r0 rt v0 vt a0 at)))))
 
 (defn guidance-system
   "Projectile Guidance System (PGS)\n
      Calculates the needed Jerk to guide the projectile to the target"
   [N pos vel acc targ]
-  (let [targ-vel (v3/zero) ;(v3/elem-subtract targ vel)
-        targ-acc (v3/zero) ;(v3/elem-subtract targ-vel vel)
-        ] 
-    (jerk-profile N pos targ vel targ-vel acc targ-acc )))
+  (jerk-profile N pos vel acc targ))
 
 (defn rand-neg1 [n] (-> (rand n) (- (/ n 2)) (* 2)))
 
@@ -85,8 +95,7 @@
   (iterate
    #(phi/update-obj %
                     (guidance-system
-                     (-> (* 60 (max (:x target) (:y target) (:z target))) 
-                         (/ 2e2) (math/cbrt) ) 
+                     1
                      (:position %) (:velocity %) (:acceleration %) target) dt)
    projectile))
 
