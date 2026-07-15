@@ -5,6 +5,7 @@
 
 (defrecord Vector3 [x y z])
 
+(defn const [a] (->Vector3 a a a))
 (defn zero [] (->Vector3 0 0 0))
 
 (defn elem3-op
@@ -50,6 +51,10 @@
   "elem-abs(u) = [abs(u1) abs(u2) ...]"
   [u]
   (elem3-op abs u))
+
+(defn lt
+  [{ux :x uy :y uz :z} {vx :x vy :y vz :z}]
+  (and (< ux vx) (< uy vy) (< uz vz)))
 
 (defn dot-product
   "Vector Cartesian Product"
