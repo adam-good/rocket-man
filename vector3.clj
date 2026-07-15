@@ -46,6 +46,11 @@
   (let [{x :x y :y z :z} u]
     (+ x y z)))
 
+(defn elem-abs
+  "elem-abs(u) = [abs(u1) abs(u2) ...]"
+  [u]
+  (elem3-op abs u))
+
 (defn dot-product
   "Vector Cartesian Product"
   [u v]
