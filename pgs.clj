@@ -5,7 +5,6 @@
 
 (ns pgs
   (:require
-   [clojure.math :as math]
    [vector3 :as v3]
    [physics :as phi]
    [utils   :as utl]
@@ -17,6 +16,24 @@
 (defn zero-does-not-exist [n] (if (== n 0) 1e-20 n))
 
 (defrecord constraints [r0 v0 a0 rt vt at])
+
+(defn c0 [r0] r0)
+(defn c1 [v0] v0)
+(defn c2 [a0] (/ a0 2))
+
+(defn target-rank1? [constraints]
+  (and
+   (contains? constraints :rt)
+   (-> (contains? constraints :vt) not)
+   (-> (contains? constraints :at) not)))
+(defn target-rank2? [constraints]
+  (and
+   (contains? constraints :rt)
+   (contains? constraints :vt)))
+
+(defn constraint-dispatch [constraints]
+  (cond
+    (target-rank1? constraints) ::rank1))
 
 (defn c3
   ([N r0 v0 a0 rt]
@@ -99,15 +116,15 @@
 (defn accel-peak
   ([N r0 v0 a0 rt]
    (let [{x-crit-time :x y-crit-time :y z-crit-time :z} (jerk-crit-time N)]
-     (v3/->Vector3 
+     (v3/->Vector3
       (:x (accel-profile x-crit-time r0 v0 a0 rt))
       (:y (accel-profile y-crit-time r0 v0 a0 rt))
       (:z (accel-profile z-crit-time r0 v0 a0 rt))))))
 
 (defn vel-peak
   ([N r0 v0 a0 rt]
-   (let [{x-crit-time :x y-crit-time :y z-crit-time :z} (accel-crit-time N r0 v0 a0 rt)] 
-     (v3/->Vector3 
+   (let [{x-crit-time :x y-crit-time :y z-crit-time :z} (accel-crit-time N r0 v0 a0 rt)]
+     (v3/->Vector3
       (:x (velocity-profile x-crit-time r0 v0 a0 rt))
       (:y (velocity-profile y-crit-time r0 v0 a0 rt))
       (:z (velocity-profile z-crit-time r0 v0 a0 rt))))))
