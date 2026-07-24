@@ -15,47 +15,86 @@
 (defn impact? [projectile target] (->> (:position projectile) (distance target) (< 3e-2)))
 (defn zero-does-not-exist [n] (if (== n 0) 1e-20 n))
 
-(defrecord constraints [r0 v0 a0 rt vt at])
-
-(defn c0 [r0] r0)
-(defn c1 [v0] v0)
-(defn c2 [a0] (/ a0 2))
-
 (defn target-rank1? [constraints]
   (and
    (contains? constraints :rt)
-   (-> (contains? constraints :vt) not)
-   (-> (contains? constraints :at) not)))
+   (not (contains? constraints :vt))
+   (not (contains? constraints :at))))
 (defn target-rank2? [constraints]
   (and
    (contains? constraints :rt)
-   (contains? constraints :vt)))
+   (contains? constraints :vt)
+   (not (contains? constraints :at))))
+
+(defn target-rank3? [constraints]
+  (and
+   (contains? constraints :rt)
+   (contains? constraints :vt)
+   (contains? constraints :at)))
 
 (defn constraint-dispatch [constraints]
   (cond
-    (target-rank1? constraints) ::rank1))
+    (target-rank1? constraints) ::rank1
+    (target-rank2? constraints) ::rank2
+    (target-rank3? constraints) ::rank3))
 
-(defn c3
-  ([N r0 v0 a0 rt]
-   (let [pos-coef (/ 1 (* N N N))
-         vel-coef (/ 1 (* N N))
-         acc-coef (/ 1 N)
-         position (v3/elem-subtract rt r0)]
-     (v3/elem-add
-      (v3/scalar-product pos-coef position)
-      (v3/scalar-product (* -1 vel-coef) v0)
-      (v3/scalar-product (* -1 acc-coef) a0))))
-  ([N r0 v0 a0 rt vt at]
-   (let [pos-coef (/ 1 (* N N N))
-         vel-coef (/ 1 (* N N))
-         acc-coef (/ 1 (* 2 N))
-         position (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
-         velocity (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product  -6 v0))
-         accel    (v3/elem-add  at                       (v3/scalar-product  -3 a0))]
-     (v3/elem-add
-      (v3/scalar-product pos-coef position)
-      (v3/scalar-product vel-coef velocity)
-      (v3/scalar-product acc-coef accel)))))
+(defmulti c0 constraint-dispatch)
+(defmethod c0 :default [_N {r0 :r0}] r0)
+
+(defmulti c1 constraint-dispatch)
+(defmethod c1 :default [_N {v0 :v0}] v0)
+
+(defmulti c2 constraint-dispatch)
+(defmethod c2 :default [_N {a0 :a0}] (/ a0 2))
+
+(defmulti c3 constraint-dispatch)
+(defmethod c3 ::rank1
+  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt}]
+  (let [pos-coef (/  1 N N N)
+        vel-coef (/ -1 N N)
+        acc-coef (/ -1 N)
+        pos-diff (v3/elem-subtract rt r0)]
+    (v3/elem-add
+     (v3/scalar-product pos-coef pos-diff)
+     (v3/scalar-product vel-coef v0)
+     (v3/scalar-product acc-coef a0))))
+(defmethod c3 ::rank2
+  [_N {_r0 :r0 _v0 :v0 _a0 :a0 _rt :rt _vt :vt}]
+  :unimplemented)
+(defmethod c3 ::rank3
+  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
+  (let [pos-coef (/ 1 N N N)
+        vel-coef (/ 1 N N)
+        acc-coef (/ 1 2 N)
+        pos-diff (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
+        vel-diff (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product -6 v0))
+        acc-diff (v3/elem-add at                        (v3/scalar-product -3 a0))]
+    (v3/elem-add
+     (v3/scalar-product pos-coef pos-diff)
+     (v3/scalar-product vel-coef vel-diff)
+     (v3/scalar-product acc-coef acc-diff))))
+
+; (defn c3
+;   ([N r0 v0 a0 rt]
+;    (let [pos-coef (/ 1 (* N N N))
+;          vel-coef (/ 1 (* N N))
+;          acc-coef (/ 1 N)
+;          position (v3/elem-subtract rt r0)]
+;      (v3/elem-add
+;       (v3/scalar-product pos-coef position)
+;       (v3/scalar-product (* -1 vel-coef) v0)
+;       (v3/scalar-product (* -1 acc-coef) a0))))
+;   ([N r0 v0 a0 rt vt at]
+;    (let [pos-coef (/ 1 (* N N N))
+;          vel-coef (/ 1 (* N N))
+;          acc-coef (/ 1 (* 2 N))
+;          position (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
+;          velocity (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product  -6 v0))
+;          accel    (v3/elem-add  at                       (v3/scalar-product  -3 a0))]
+;      (v3/elem-add
+;       (v3/scalar-product pos-coef position)
+;       (v3/scalar-product vel-coef velocity)
+;       (v3/scalar-product acc-coef accel)))))
 
 (defn c4 [N r0 rt v0 vt a0 at]
   (let [pos-coef (/ 15 (* N N N N))
