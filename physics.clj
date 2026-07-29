@@ -27,4 +27,7 @@
     (update-vector (:acceleration object) jerk delta-time)
     (:mass object))))
 
-
+;; Defining Polynomial Interpolation Constants
+(defn c0-order3 [{r0 :r0}] r0)
+(defn c0-order4 [{r0 :r0}] r0)
+(defn c0-order5 [{r0 :r0}] r0)
