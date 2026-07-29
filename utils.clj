@@ -1,5 +1,7 @@
 (ns utils)
 
+(defn unimplemented [] ::unimplemented)
+
 (defn zip
   "Zips to collections into a vector of element pairs"
   [u v]
@@ -12,5 +14,5 @@
    (cond
      (and (== a 0) (== b 0)) true
      (and (== a 0) (not= b 0)) false
-     (and (not= a 0) (== b 0)) false 
+     (and (not= a 0) (== b 0)) false
      :else (-> (/ a b) (Math/abs) (- 1.0) (< eps)))))
