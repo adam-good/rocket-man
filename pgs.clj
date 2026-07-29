@@ -8,7 +8,9 @@
    [vector3 :as v3]
    [physics :as phi]
    [utils   :as utl]
-   [json    :as json]))
+   [json    :as json])
+  (:require
+   [utils :only [unimplemented]]))
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
@@ -41,17 +43,17 @@
 ;; TODO: This might be simplified after I solve other cases
 (defmulti  c0 constraint-dispatch)
 (defmethod c0 ::rank1 [_N {r0 :r0}] r0)
-(defmethod c0 ::rank2 [_N {_r0 :r0}] :unimplemented)
+(defmethod c0 ::rank2 [_N {_r0 :r0}] (unimplemented))
 (defmethod c0 ::rank3 [_N {r0 :r0}] r0)
 
 (defmulti  c1 constraint-dispatch)
 (defmethod c1 ::rank1 [_N {v0 :v0}] v0)
-(defmethod c1 ::rank2 [_N {_v0 :v0}] :unimplemented)
+(defmethod c1 ::rank2 [_N {_v0 :v0}] (unimplemented))
 (defmethod c1 ::rank3 [_N {v0 :v0}] v0)
 
 (defmulti  c2 constraint-dispatch)
 (defmethod c2 ::rank1 [_N {a0 :a0}] (/ a0 2))
-(defmethod c2 ::rank2 [_N {_a0 :a0}] :unimplemented)
+(defmethod c2 ::rank2 [_N {_a0 :a0}] (unimplemented))
 (defmethod c2 ::rank3 [_N {a0 :a0}] (/ a0 2))
 
 (defmulti c3 constraint-dispatch)
@@ -83,7 +85,7 @@
 
 (defmulti  c4 constraint-dispatch)
 (defmethod c4 ::rank1 [_N {}] 0) ; Rank 1 uses a rank3 polynomial
-(defmethod c4 ::rank2 [_N {}] :unimplimented)
+(defmethod c4 ::rank2 [_N {}] (unimplemented))
 (defmethod c4 ::rank3
   [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
   (let [pos-coef (/ 1 N N N N)
@@ -99,7 +101,7 @@
 
 (defmulti  c5 constraint-dispatch)
 (defmethod c5 ::rank1 [_N _map] 0)
-(defmethod c5 ::rank2 [_N _map] :unimplemented)
+(defmethod c5 ::rank2 [_N _map] (unimplemented))
 (defmethod c5 ::rank3
   [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
   (let [pos-coef (/  6 N N N N N)
@@ -116,7 +118,7 @@
 (defmulti  jerk-profile constraint-dispatch)
 (defmethod jerk-profile ::rank1
   [N constraints] (v3/scalar-product 6 (c3 N constraints)))
-(defmethod jerk-profile ::rank2 [_N _constraints] :unimplemented)
+(defmethod jerk-profile ::rank2 [_N _constraints] (unimplemented))
 (defmethod jerk-profile ::rank3
   [N constraints]
   (v3/elem-add
@@ -128,8 +130,8 @@
 (defmethod accel-profile ::rank1 [N constraints]
   (let [{a0 :a0} constraints]
     (v3/elem-add a0 (v3/scalar-product (* 6 N) (c3 N constraints)))))
-(defmethod accel-profile ::rank2 [_N _constraints] :unimplimented)
-(defmethod accel-profile ::rank2 [_N _constraints] :unimplimented)
+(defmethod accel-profile ::rank2 [_N _constraints] (unimplemented))
+(defmethod accel-profile ::rank2 [_N _constraints] (unimplemented))
 
 (defmulti velocity-profile constraint-dispatch)
 (defmethod velocity-profile ::rank1
@@ -139,8 +141,8 @@
      v0
      (v3/scalar-product N a0)
      (v3/scalar-product (* 3 N N) (c3 N constraints)))))
-(defmethod velocity-profile ::rank2 [_N _constraints] :unimplimented)
-(defmethod velocity-profile ::rank3 [_N _constraints] :unimplimented)
+(defmethod velocity-profile ::rank2 [_N _constraints] (unimplemented))
+(defmethod velocity-profile ::rank3 [_N _constraints] (unimplemented))
 
 ;; TODO: This needs fixed for non-constant jerk
 (defn jerk-crit-time [N] (v3/->Vector3 N N N))
@@ -152,8 +154,8 @@
     (->> (v3/scalar-product 6 (c3 N constraints))
          (v3/elem3-op / (v3/scalar-product -1 a0))
          (v3/elem3-op zero-does-not-exist))))
-(defmethod accel-crit-time ::rank2 [_N _constraints] :unimplimented)
-(defmethod accel-crit-time ::rank3 [_N _constraints] :unimplimented)
+(defmethod accel-crit-time ::rank2 [_N _constraints] (unimplemented))
+(defmethod accel-crit-time ::rank3 [_N _constraints] (unimplemented))
 
 ;; TODO: This needs fixed for non-constant jerk
 (defn jerk-peak
