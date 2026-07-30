@@ -1,6 +1,6 @@
 (ns utils)
 
-(defn unimplemented [] ::unimplemented)
+(defn unimplemented [] :unimplemented)
 
 (defn zip
   "Zips to collections into a vector of element pairs"

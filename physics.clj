@@ -102,8 +102,30 @@
   [N constraints]
   (v3/scalar-product 6 (c3-order3 N constraints)))
 (defn jerk-profile-order4 [] (unimplemented))
-(defn jerk-profile-order5 [N constraints]
+(defn jerk-profile-order5
+  [N constraints]
   (v3/elem-add
    (v3/scalar-product 6 (c3-order5 N constraints))
    (v3/scalar-product (* 24 N) (c4-order5 N constraints))
    (v3/scalar-product (* 60 N N) (c5-order5 N constraints))))
+
+(defn accel-profile-order3
+  [N constraints]
+  (let [{a0 :a0} constraints]
+    (v3/elem-add a0 (v3/scalar-product (* 6 N) (c3-order3 N constraints)))))
+(defn accel-profile-order4 [_N _constraints] (unimplemented))
+(defn accel-profile-order5 [_N _constraints] (unimplemented))
+
+(defn velocity-profile-order3
+  [N constraints]
+  (let [{v0 :v0 a0 :a0} constraints]
+    (v3/elem-add
+     v0
+     (v3/scalar-product N a0)
+     (v3/scalar-product (* 3 N N) (c3-order3 N constraints)))))
+(defn velocity-profile-order4 [] (unimplemented))
+(defn velocity-profile-order5 [] (unimplemented))
+
+(defn jerk-crit-time-order3 [N] (v3/->Vector3 N N N))
+(defn jerk-crit-time-order4 []  (unimplemented))
+(defn jerk-crit-time-order5 []  (unimplemented))

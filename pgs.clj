@@ -6,11 +6,11 @@
 (ns pgs
   (:require
    [vector3 :as v3]
-   [physics :as phi]
+   [physics :as phy]
    [utils   :as utl]
    [json    :as json])
   (:require
-   [utils :only [unimplemented]]))
+   [utils :refer [unimplemented]]))
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
@@ -42,89 +42,39 @@
 
 ;; TODO: This might be simplified after I solve other cases
 (defmulti  c0 constraint-dispatch)
-(defmethod c0 ::rank1 [_N {r0 :r0}] r0)
-(defmethod c0 ::rank2 [_N {_r0 :r0}] (unimplemented))
-(defmethod c0 ::rank3 [_N {r0 :r0}] r0)
+(defmethod c0 ::rank1 [_N {r0   :r0}] (phy/c0-order3 r0))
+(defmethod c0 ::rank2 [_N {_r0  :r0}] (phy/c0-order4))
+(defmethod c0 ::rank3 [_N {r0   :r0}] (phy/c0-order5 r0))
 
 (defmulti  c1 constraint-dispatch)
-(defmethod c1 ::rank1 [_N {v0 :v0}] v0)
-(defmethod c1 ::rank2 [_N {_v0 :v0}] (unimplemented))
-(defmethod c1 ::rank3 [_N {v0 :v0}] v0)
+(defmethod c1 ::rank1 [_N {v0  :v0}] (phy/c1-order3 v0))
+(defmethod c1 ::rank2 [_N {_v0 :v0}] (phy/c1-order4))
+(defmethod c1 ::rank3 [_N {v0  :v0}] (phy/c1-order5 v0))
 
 (defmulti  c2 constraint-dispatch)
-(defmethod c2 ::rank1 [_N {a0 :a0}] (/ a0 2))
-(defmethod c2 ::rank2 [_N {_a0 :a0}] (unimplemented))
-(defmethod c2 ::rank3 [_N {a0 :a0}] (/ a0 2))
+(defmethod c2 ::rank1 [_N {a0  :a0}] (phy/c1-order3 a0))
+(defmethod c2 ::rank2 [_N {_a0 :a0}] (phy/c1-order4))
+(defmethod c2 ::rank3 [_N {a0  :a0}] (phy/c1-order5 a0))
 
-(defmulti c3 constraint-dispatch)
-(defmethod c3 ::rank1
-  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt}]
-  (let [pos-coef (/  1 N N N)
-        vel-coef (/ -1 N N)
-        acc-coef (/ -1 N)
-        pos-diff (v3/elem-subtract rt r0)]
-    (v3/elem-add
-     (v3/scalar-product pos-coef pos-diff)
-     (v3/scalar-product vel-coef v0)
-     (v3/scalar-product acc-coef a0))))
-(defmethod c3 ::rank2
-  [_N {_r0 :r0 _v0 :v0 _a0 :a0 _rt :rt _vt :vt}]
-  :unimplemented)
-(defmethod c3 ::rank3
-  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
-  (let [pos-coef (/ 1 N N N)
-        vel-coef (/ 1 N N)
-        acc-coef (/ 1 2 N)
-        pos-diff (v3/elem-add (v3/scalar-product 10 rt) (v3/scalar-product -10 r0))
-        vel-diff (v3/elem-add (v3/scalar-product -9 vt) (v3/scalar-product -6 v0))
-        acc-diff (v3/elem-add at                        (v3/scalar-product -3 a0))]
-    (v3/elem-add
-     (v3/scalar-product pos-coef pos-diff)
-     (v3/scalar-product vel-coef vel-diff)
-     (v3/scalar-product acc-coef acc-diff))))
+(defmulti  c3 constraint-dispatch)
+(defmethod c3 ::rank1 [N constraints]   (phy/c3-order3 N constraints))
+(defmethod c3 ::rank2 [_N _constraints] (phy/c3-order4))
+(defmethod c3 ::rank3 [N constraints]   (phy/c3-order5 N constraints))
 
 (defmulti  c4 constraint-dispatch)
-(defmethod c4 ::rank1 [_N {}] 0) ; Rank 1 uses a rank3 polynomial
-(defmethod c4 ::rank2 [_N {}] (unimplemented))
-(defmethod c4 ::rank3
-  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
-  (let [pos-coef (/ 1 N N N N)
-        vel-coef (/ 1 N N N)
-        acc-coef (/ 1 2 N N)
-        pos-diff (v3/elem-add (v3/scalar-product 15 r0) (v3/scalar-product -15 rt))
-        vel-diff (v3/elem-add (v3/scalar-product 8 v0) (v3/scalar-product 7 vt))
-        acc-diff (v3/elem-add (v3/scalar-product 3 a0) (v3/scalar-product -2 at))]
-    (v3/elem-add
-     (v3/scalar-product pos-coef pos-diff)
-     (v3/scalar-product vel-coef vel-diff)
-     (v3/scalar-product acc-coef acc-diff))))
+(defmethod c4 ::rank1 [_N _constraints] (phy/c4-order3))
+(defmethod c4 ::rank2 [_N _constraints] (phy/c4-order4))
+(defmethod c4 ::rank3 [N constraints]   (phy/c4-order5 N constraints))
 
 (defmulti  c5 constraint-dispatch)
-(defmethod c5 ::rank1 [_N _map] 0)
-(defmethod c5 ::rank2 [_N _map] (unimplemented))
-(defmethod c5 ::rank3
-  [N {r0 :r0 v0 :v0 a0 :a0 rt :rt vt :vt at :at}]
-  (let [pos-coef (/  6 N N N N N)
-        vel-coef (/ -3 N N N N)
-        acc-coef (/  1 N N)
-        pos-diff (v3/elem-subtract rt r0)
-        vel-diff (v3/elem-add v0 vt)
-        acc-diff (v3/elem-subtract at a0)]
-    (v3/elem-add
-     (v3/scalar-product pos-coef pos-diff)
-     (v3/scalar-product vel-coef vel-diff)
-     (v3/scalar-product acc-coef acc-diff))))
+(defmethod c5 ::rank1 [_N _constraints] (phy/c5-order3))
+(defmethod c5 ::rank2 [_N _constraints] (phy/c5-order4))
+(defmethod c5 ::rank3 [N constraints]   (phy/c5-order5 N constraints))
 
 (defmulti  jerk-profile constraint-dispatch)
-(defmethod jerk-profile ::rank1
-  [N constraints] (v3/scalar-product 6 (c3 N constraints)))
-(defmethod jerk-profile ::rank2 [_N _constraints] (unimplemented))
-(defmethod jerk-profile ::rank3
-  [N constraints]
-  (v3/elem-add
-   (v3/scalar-product 6 (c3 N constraints))
-   (v3/scalar-product (* 24 N) (c4 N constraints))
-   (v3/scalar-product (* 60 N N) (c4 N constraints))))
+(defmethod jerk-profile ::rank1 [N constraints]   (phy/jerk-profile-order3 N constraints))
+(defmethod jerk-profile ::rank2 [_N _constraints] (phy/jerk-profile-order4))
+(defmethod jerk-profile ::rank3 [N constraints]   (phy/jerk-profile-order5 N constraints))
 
 (defmulti accel-profile constraint-dispatch)
 (defmethod accel-profile ::rank1 [N constraints]
@@ -211,7 +161,7 @@
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
 (def projectile
-  (phi/->PhysicalObj
+  (phy/->PhysicalObj
    (v3/zero)               ; Position 
    (v3/->Vector3 0 0 0.2)  ; Velocity 
    (v3/zero)               ; Acceleration 
@@ -222,7 +172,7 @@
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series
   (iterate
-   #(phi/update-obj %
+   #(phy/update-obj %
                     (guidance-system
                      (search-target-time
                       {:max-jerk (v3/const 8) :max-accel (v3/const 16) :max-vel (v3/const 32)}
