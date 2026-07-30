@@ -30,17 +30,17 @@
     (:mass object))))
 
 ;; Defining Polynomial Interpolation Constants
-(defn c0-order3 [{r0 :r0}] r0)
+(defn c0-order3 [r0] r0)
 (defn c0-order4 [] (unimplemented))
-(defn c0-order5 [{r0 :r0}] r0)
+(defn c0-order5 [r0] r0)
 
-(defn c1-order3 [{v0 :v0}] v0)
+(defn c1-order3 [v0] v0)
 (defn c1-order4 [] (unimplemented))
-(defn c1-order5 [{v0 :v0}] v0)
+(defn c1-order5 [v0] v0)
 
-(defn c2-order3 [{a0 :a0}] (/ a0 2))
+(defn c2-order3 [a0] (/ a0 2))
 (defn c2-order4 [] (unimplemented)) ; TODO: Verify by hand
-(defn c2-order5 [{a0 :a0}] (/ a0 2))
+(defn c2-order5 [a0] (/ a0 2))
 
 (defn c3-order3
   [N {r0 :r0 v0 :v0 a0 :a0 rt :rt}]
