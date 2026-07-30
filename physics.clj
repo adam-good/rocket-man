@@ -6,7 +6,7 @@
    [vector3 :as v3]
    [utils])
   (:require
-   [utils :only [unimplemented]]))
+   [utils :refer [unimplemented]]))
 
 (defn get-differential [vector delta-time]
   (v3/scalar-product delta-time vector))
@@ -97,3 +97,13 @@
      (v3/scalar-product pos-coef pos-diff)
      (v3/scalar-product vel-coef vel-diff)
      (v3/scalar-product acc-coef acc-diff))))
+
+(defn jerk-profile-order3
+  [N constraints]
+  (v3/scalar-product 6 (c3-order3 N constraints)))
+(defn jerk-profile-order4 [] (unimplemented))
+(defn jerk-profile-order5 [N constraints]
+  (v3/elem-add
+   (v3/scalar-product 6 (c3-order5 N constraints))
+   (v3/scalar-product (* 24 N) (c4-order5 N constraints))
+   (v3/scalar-product (* 60 N N) (c5-order5 N constraints))))
