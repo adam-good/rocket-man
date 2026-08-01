@@ -2,6 +2,9 @@
 
 (defn unimplemented [] :unimplemented)
 
+(defn contains-all? [col & keys]
+  (every? #(contains? col %1) keys))
+
 (defn zip
   "Zips to collections into a vector of element pairs"
   [u v]
