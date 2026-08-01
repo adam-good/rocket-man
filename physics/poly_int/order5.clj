@@ -1,22 +1,22 @@
 (load-file "vector3.clj")
 (load-file "utils.clj")
 
-(ns order5
+(ns physics.poly-int.order5
   (:require 
     [vector3 :as v3]
     [utils :refer [unimplemented]]))
 
-(defn c0 [] (unimplemented))
-(defn c1 [] (unimplemented))
-(defn c2 [] (unimplemented))
-(defn c3 [] (unimplemented))
-(defn c4 [] (unimplemented))
-(defn c5 [] (unimplemented))
-(defn jerk-profile [] (unimplemented))
-(defn accel-profile [] (unimplemented))
-(defn velocity-profile [] (unimplemented))
-(defn jerk-crit-time [] (unimplemented))
-(defn accel-crit-time [] (unimplemented))
-(defn jerk-peak [] (unimplemented))
-(defn accel-peak [] (unimplemented))
-(defn velocity-peak [] (unimplemented))
+(defn c0 [_ _] (unimplemented))
+(defn c1 [_ _] (unimplemented))
+(defn c2 [_ _] (unimplemented))
+(defn c3 [_ _] (unimplemented))
+(defn c4 [_ _] (unimplemented))
+(defn c5 [_ _] (unimplemented))
+(defn jerk-profile [_ _] (unimplemented))
+(defn accel-profile [_ _] (unimplemented))
+(defn velocity-profile [_ _] (unimplemented))
+(defn jerk-crit-time [_ _] (unimplemented))
+(defn accel-crit-time [_ _] (unimplemented))
+(defn jerk-peak [_ _] (unimplemented))
+(defn accel-peak [_ _] (unimplemented))
+(defn velocity-peak [_ _] (unimplemented))
