@@ -1,7 +1,6 @@
-(load-file "utils.clj")
 
-(ns vector3
-  (:require [utils]))
+(ns physics.vector3
+  (:require [utils.utils :as utils]))
 
 (defrecord Vector3 [x y z])
 

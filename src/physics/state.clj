@@ -1,9 +1,9 @@
 (load-file "vector3.clj")
 (load-file "utils.clj")
 
-(ns physics
+(ns physics.state
   (:require
-   [vector3 :as v3]
+   [physics.vector3 :as v3]
    [utils])
   (:require
    [utils :refer [unimplemented]]))

@@ -1,4 +1,4 @@
-(ns utils)
+(ns utils.utils)
 
 (defn unimplemented [] :unimplemented)
 
