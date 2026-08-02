@@ -17,30 +17,6 @@
 (defn impact? [projectile target] (->> (:position projectile) (distance target) (< 3e-2)))
 (defn zero-does-not-exist [n] (if (== n 0) 1e-20 n))
 
-(defn peak-values [N constraints]
-  {:peak-jerk (jerk-peak  N constraints)
-   :peak-acc  (accel-peak N constraints)
-   :peak-vel  (vel-peak   N constraints)})
-
-(defrecord max-values [max-jerk max-accel max-vel])
-(defn n-mid [a b] (/ (+ a b) 2))
-(defn t-is-valid? [{max-jerk  :max-jerk  max-accel :max-accel max-vel  :max-vel}
-                   {peak-jerk :peak-jerk peak-accel  :peak-acc  peak-vel :peak-vel}]
-  (and
-   (v3/lt peak-jerk max-jerk)
-   (v3/lt peak-accel max-accel)
-   (v3/lt peak-vel max-vel)))
-(defn search-target-time
-  [{max-jerk :max-jerk max-accel :max-accel max-vel :max-vel} ;; max values
-   t-min t-max tol
-   constraints] ; constraints
-  (let [t-mid (n-mid t-min t-max)
-        peak-vals   (peak-values t-mid constraints)
-        max-vals    (->max-values max-jerk max-accel max-vel)]
-    (cond
-      (< (- t-max t-min) tol) t-mid
-      (t-is-valid? max-vals peak-vals) (search-target-time max-vals t-min t-mid tol constraints)
-      :else (search-target-time max-vals t-mid t-max tol constraints))))
 
 (defn guidance-system
   "Projectile Guidance System (PGS)\n
