@@ -1,12 +1,6 @@
-(load-file "vector3.clj")
-(load-file "utils.clj")
-
 (ns physics.state
   (:require
-   [physics.vector3 :as v3]
-   [utils])
-  (:require
-   [utils :refer [unimplemented]]))
+   [physics.vector3 :as v3]))
 
 (defn get-differential [vector delta-time]
   (v3/scalar-product delta-time vector))

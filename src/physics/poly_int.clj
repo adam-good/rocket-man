@@ -1,15 +1,10 @@
-(load-file "physics/poly-int/order3.clj")
-(load-file "physics/poly-int/order4.clj")
-(load-file "physics/poly-int/order5.clj")
-(load-file "utils")
-
 (ns physics.poly-int
   (:require
     [physics.poly-int.order3 :as odr3]
     [physics.poly-int.order4 :as odr4]
     [physics.poly-int.order5 :as odr5]
-    [vector3 :as v3]
-    [utils :refer [contains-all?]]))
+    [physics.vector3 :as v3]
+    [utils.utils :refer [contains-all?]]))
 
 ; TODO: Find a more abstract way to do this
 (defn get-order [_N constraints]

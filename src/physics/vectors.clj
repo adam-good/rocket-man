@@ -1,7 +1,5 @@
-(load-file "utils.clj")
-
-(ns vectors
-  (:require [utils]))
+(ns physics.vectors
+  (:require [utils.utils :as utils]))
 
 ;; Generalized vector ops
 (defn elementwise-op [u v op]

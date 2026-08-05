@@ -1,10 +1,7 @@
-(load-file "vector3.clj")
-(load-file "utils.clj")
-
 (ns physics.poly-int.order5
   (:require 
-    [vector3 :as v3]
-    [utils :refer [unimplemented]]))
+    [physics.vector3 :as v3]
+    [utils.utils :refer [unimplemented]]))
 
 (defn c0 [_ _] (unimplemented))
 (defn c1 [_ _] (unimplemented))

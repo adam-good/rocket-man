@@ -1,9 +1,7 @@
-(load-file "vector3.clj")
-(load-file "utils.clj")
 
 (ns physics.poly-int.order3
   (:require
-   [vector3 :as v3]))
+   [physics.vector3 :as v3]))
 
 (defn c0 [_ {r0 :r0}] r0)
 (defn c1 [_ {v0 :v0}] v0)

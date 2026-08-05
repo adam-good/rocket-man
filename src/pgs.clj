@@ -1,21 +1,15 @@
-(load-file "vector3.clj")
-(load-file "physics.clj")
-(load-file "utils.clj")
-(load-file "json.clj")
-
 (ns pgs
   (:require
-   [vector3 :as v3]
-   [physics :as phy]
-   [utils   :as utl]
-   [json    :as json])
-  (:require
-   [utils :refer [unimplemented]]))
+   [physics.vector3 :as v3]
+   [physics.state   :as state]
+   [utils.utils     :as utils]
+   [utils.json      :as json]))
 
 ;; Helper Functions
 (defn distance [u v] (->> (v3/elem-subtract v u) (v3/magnitude) (abs)))
 (defn impact? [projectile target] (->> (:position projectile) (distance target) (< 3e-2)))
-(defn zero-does-not-exist [n] (if (== n 0) 1e-20 n))
+;; TODO: Make sure we don't need this BS
+;; (defn zero-does-not-exist [n] (if (== n 0) 1e-20 n))
 
 
 (defn guidance-system
@@ -27,7 +21,7 @@
 ;; Initial Conditions
 (def target (v3/->Vector3 1 1 1))
 (def projectile
-  (phy/->PhysicalObj
+  (state/->PhysicalObj
    (v3/zero)               ; Position 
    (v3/->Vector3 0 0 0.2)  ; Velocity 
    (v3/zero)               ; Acceleration 
@@ -38,7 +32,7 @@
 (def time-series (iterate #(+ dt %) 0.0))
 (def obj-series
   (iterate
-   #(phy/update-obj %
+   #(state/update-obj %
                     (guidance-system
                      (search-target-time
                       {:max-jerk (v3/const 8) :max-accel (v3/const 16) :max-vel (v3/const 32)}
@@ -50,7 +44,7 @@
 ;; Limit Results
 (def result (take-while #(impact? % target) obj-series))
 (def raw-data
-  (for [[timestep, data] (utl/zip time-series result)]
+  (for [[timestep, data] (utils/zip time-series result)]
     {:timestep timestep :datapoint data}))
 (def dataset (take 600 raw-data))
 
