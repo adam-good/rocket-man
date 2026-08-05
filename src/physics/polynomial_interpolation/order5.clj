@@ -1,4 +1,4 @@
-(ns physics.poly-int.order5
+(ns physics.polynomial-interpolation.order5
   (:require 
     [physics.vector3 :as v3]
     [utils.utils :refer [unimplemented]]))

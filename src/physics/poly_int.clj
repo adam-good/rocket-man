@@ -1,8 +1,8 @@
 (ns physics.poly-int
   (:require
-    [physics.poly-int.order3 :as odr3]
-    [physics.poly-int.order4 :as odr4]
-    [physics.poly-int.order5 :as odr5]
+    [physics.polynomial-interpolation.order3 :as odr3]
+    [physics.polynomial-interpolation.order4 :as odr4]
+    [physics.polynomial-interpolation.order5 :as odr5]
     [physics.vector3 :as v3]
     [utils.utils :refer [contains-all?]]))
 

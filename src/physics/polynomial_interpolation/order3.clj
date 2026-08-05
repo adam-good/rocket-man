@@ -1,5 +1,5 @@
 
-(ns physics.poly-int.order3
+(ns physics.polynomial-interpolation.order3
   (:require
    [physics.vector3 :as v3]))
 
